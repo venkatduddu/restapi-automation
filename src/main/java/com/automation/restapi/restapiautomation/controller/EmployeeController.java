@@ -7,12 +7,15 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -34,8 +37,12 @@ public class EmployeeController {
     return ResponseEntity.notFound().build();
   }
 
-  @GetMapping()
-  public ResponseEntity<List<Employee>> getAllEmployee() {
+  @GetMapping
+  public ResponseEntity<List<Employee>> getAllEmployee(@RequestParam("name") String name) {
+
+    if(StringUtils.hasText(name)){
+      return ResponseEntity.ok(employeeRepository.findByName(name));
+    }
 
     List<Employee> employees = employeeRepository.findAll();
 
@@ -46,6 +53,15 @@ public class EmployeeController {
   public ResponseEntity<Employee> saveEmployeeB(@RequestBody Employee employee) {
 
     Employee savedEmplyee = employeeRepository.saveAndFlush(employee);
+
+    return ResponseEntity.ok(savedEmplyee);
+  }
+
+  @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE, value = "{id}")
+  public ResponseEntity<Employee> saveEmployeeB(@RequestBody Employee employee, @PathVariable("id") Long id) {
+    employee.setId(id);
+
+    Employee savedEmplyee = employeeRepository.save(employee);
 
     return ResponseEntity.ok(savedEmplyee);
   }
